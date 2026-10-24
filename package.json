@@ -1,6 +1,6 @@
 {
   "name": "pokerogue-enemy-hover",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Browser extension that shows base stats and missing unlocks when hovering an enemy in PokeRogue",
   "type": "module",

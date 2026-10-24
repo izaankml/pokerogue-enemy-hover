@@ -39,7 +39,7 @@ pnpm build
 
 **Firefox 128+:** open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on**, and select `dist/manifest.json`. Temporary add-ons are removed when Firefox restarts.
 
-Reload the game tab afterwards. The DevTools console shows `[pokerogue-enemy-hover] attached to the game` when the extension has found the game.
+Reload the game tab afterwards. The DevTools console shows `[pokerogue-enemy-hover] v<version> attached to the game` when the extension has found the game. The version comes from `package.json`, which the build also writes into `dist/manifest.json`, so the extensions page and the console both show which build is loaded.
 
 For development, `pnpm watch` rebuilds on change; reload the extension and the game tab to pick up a new build.
 
