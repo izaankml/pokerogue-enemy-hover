@@ -37,7 +37,7 @@ export interface UiHandlerView {
   active?: boolean;
   /** The evolution scene's message window, shown only while the scene is open. */
   messageContainer?: { visible: boolean };
-  /** Every starter species, on the Pokédex and starter select handlers. */
+  /** Every starter species, on the Pokédex page handler. */
   allSpecies?: readonly SpeciesView[];
 }
 
@@ -106,11 +106,11 @@ export interface OptionSelectConfigView {
   options?: OptionSelectItemView[];
 }
 
-/** One menu option. The live game takes its color from `style`, and the beta from `color`. */
+/** One menu option. */
 export interface OptionSelectItemView {
   /** Localized text, which for a biome is the biome's name. */
   label: string;
-  style?: number;
+  /** A `TextStyle` value for the option's text. */
   color?: number;
 }
 
@@ -138,7 +138,6 @@ export interface DexEntryView {
   seenCount: number;
   caughtAttr: bigint;
   natureAttr: number;
-  hatchedCount: number;
   ivs: number[];
 }
 

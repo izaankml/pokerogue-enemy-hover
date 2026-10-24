@@ -133,24 +133,10 @@ export const MINT_MODIFIER_TYPE_NAME = "PokemonNatureChangeModifierType";
 export const OWNED_ICON_NEW_UNLOCK_TINT = 0x808080;
 
 /**
- * Same-species egg candy costs from `allStarterCandyCosts` in `src/data/balance/starters.ts`,
- * indexed by starter cost minus one. Each hatch threshold reached moves to the next, cheaper cost.
+ * Same-species egg candy costs from the `eggCost` of `allStarterCandyCosts` in
+ * `src/data/balance/starters.ts`, indexed by starter cost minus one.
  */
-export const SAME_SPECIES_EGG_CANDY_COSTS: readonly {
-  eggCosts: readonly number[];
-  hatchThresholds: readonly number[];
-}[] = [
-  { eggCosts: [30, 27, 22, 15], hatchThresholds: [20, 40, 80] },
-  { eggCosts: [30, 27, 22, 15], hatchThresholds: [20, 40, 80] },
-  { eggCosts: [25, 22, 18, 12], hatchThresholds: [20, 40, 80] },
-  { eggCosts: [20, 18, 15, 10], hatchThresholds: [15, 30, 60] },
-  { eggCosts: [18, 16, 13, 9], hatchThresholds: [15, 30, 60] },
-  { eggCosts: [15, 13, 11, 7], hatchThresholds: [15, 30, 60] },
-  { eggCosts: [12, 10, 9, 6], hatchThresholds: [10, 20, 40] },
-  { eggCosts: [10, 9, 7, 5], hatchThresholds: [10, 20, 40] },
-  { eggCosts: [10, 9, 7, 5], hatchThresholds: [10, 20, 40] },
-  { eggCosts: [10, 9, 7, 5], hatchThresholds: [8, 16, 32] },
-];
+export const SAME_SPECIES_EGG_CANDY_COSTS: readonly number[] = [20, 20, 15, 12, 10, 8, 7, 6, 6, 5];
 
 /** Width of the game's UI coordinate space (`scaledCanvas` in `src/scene-base.ts`). */
 export const UI_CANVAS_WIDTH = 320;

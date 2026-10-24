@@ -125,10 +125,7 @@ function listStarterProgress(rootSpeciesId: number, { gameData, findStarterSpeci
   }
   const eggMoveCount = countSetBits(starterEntry.eggMoves, EGG_MOVE_COUNT);
   // A value reduction of zero leaves the base cost, which egg prices are based on.
-  const eggCandyCost = getSameSpeciesEggCandyCost(
-    gameData.getSpeciesStarterValue(rootSpeciesId, 0),
-    rootDexEntry.hatchedCount,
-  );
+  const eggCandyCost = getSameSpeciesEggCandyCost(gameData.getSpeciesStarterValue(rootSpeciesId, 0));
   return [
     {
       text: starterEntry.passiveAttr & PASSIVE_UNLOCKED ? "Passive" : "Passive Locked",
@@ -182,16 +179,8 @@ function getVariantProgress(dexEntry: DexEntryView, species: SpeciesView | undef
 }
 
 /** Mirrors `getSameSpeciesEggCandyCounts` in `src/data/balance/starters.ts`. */
-function getSameSpeciesEggCandyCost(starterCost: number, hatchCount: number): number | null {
-  const candyCosts = SAME_SPECIES_EGG_CANDY_COSTS[starterCost - 1];
-  if (!candyCosts) {
-    return null;
-  }
-  let eggCostIndex = 0;
-  while (eggCostIndex < candyCosts.hatchThresholds.length && hatchCount >= candyCosts.hatchThresholds[eggCostIndex]!) {
-    eggCostIndex++;
-  }
-  return candyCosts.eggCosts[eggCostIndex] ?? null;
+function getSameSpeciesEggCandyCost(starterCost: number): number | null {
+  return SAME_SPECIES_EGG_CANDY_COSTS[starterCost - 1] ?? null;
 }
 
 function countSetBits(bitField: number, bitCount: number): number {

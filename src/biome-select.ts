@@ -63,7 +63,6 @@ function colorMeltanRouteOptions(battleScene: BattleSceneView, config: OptionSel
   options.forEach((option, optionIndex) => {
     const biome = optionBiomes[optionIndex];
     if (biome !== undefined && routeBiomes.includes(biome)) {
-      option.style = SPECIAL_OPTION_TEXT_STYLE;
       option.color = SPECIAL_OPTION_TEXT_STYLE;
     }
   });

@@ -3,8 +3,8 @@ import type { BattleSceneView, SpeciesView } from "./game-types.ts";
 let starterSpeciesById: Map<number, SpeciesView> | null = null;
 
 /**
- * Finds a starter species through the Pokédex and starter select handlers, which list every
- * starter species once the UI is set up. Returns `undefined` until then.
+ * Finds a starter species through the Pokédex page handler, which lists every starter species
+ * once the UI is set up. Returns `undefined` until then.
  */
 export function findStarterSpecies(battleScene: BattleSceneView, speciesId: number): SpeciesView | undefined {
   if (!starterSpeciesById) {

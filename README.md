@@ -18,11 +18,11 @@ After you choose a mint as a reward, the party screen labels each slot in place 
 
 Cancelling the party screen returns you to the rewards with the mint unspent. A slot keeps its HP bar when the game would unlock nothing, because the line's first stage has never been caught. For a fusion, only the first species' line counts.
 
-In a classic run, until the Pokédex counts Meltan as fought, the biome choice that a Map offers colors the biome with the best chance of leading to a fight with one. The color is the one the game gives special Mystery Encounter choices: green in the modern theme, gold in the legacy one. Meltan never appears in the wild; only Scientist trainers carry it, they appear only in the Laboratory, the Desert and the Ancient Ruins, and their Meltan begins to evolve at wave 70.
+In a classic run, until the Pokédex counts Meltan as fought, the biome choice that a Map offers colors the biome with the best chance of leading to a fight with one. The color is the one the game gives special Mystery Encounter choices: green in the modern theme, gold in the legacy one. Meltan never appears in the wild; only Scientist trainers carry it, they appear only in the Laboratory, the Desert and the Ancient Ruins, and their Meltan begins to evolve at wave 69.
 
-The ranking comes from a simulation of the game's rules: random trainer waves, the Mysterious Challengers encounter, Scientist parties and evolution, with the best biome taken at every later fork. `src/meltan-route.ts` holds the resulting value of each biome at each ten-wave stage of a run. In practice it steers you along Plains → Grassy Field → Tall Grass → Cave → Laboratory for waves 51 to 60, and through Badlands → Desert → Ancient Ruins when the Cave does not offer the Laboratory. It works from any biome, including one a Mystery Encounter teleported you to.
+The ranking comes from a simulation of the game's rules: random trainer waves, the Mysterious Challengers encounter, Scientist parties and evolution, with the best biome taken at every later fork. `src/meltan-route.ts` holds the resulting value of each biome at each ten-wave stage of a run, which `pnpm simulate-meltan-route` prints from `scripts/simulate-meltan-route.ts`. In practice it steers you along Plains → Grassy Field → Tall Grass → Cave → Laboratory for waves 51 to 60, and through Badlands → Desert → Ancient Ruins when the Cave does not offer the Laboratory. It works from any biome, including one a Mystery Encounter teleported you to.
 
-Biomes within 2% of the best are colored as well. When no offered biome still reaches a Scientist before Meltan evolves, none is colored. The ranking is the same on the live game and on the beta, where every chance is about twice as high.
+Biomes within 2% of the best are colored as well. When no offered biome still reaches a Scientist before Meltan evolves, none is colored.
 
 On the starter select screen, hovering a caught starter shows how many of the 25 natures it has unlocked. The tooltip stays hidden while a menu, filter dropdown or message covers the grid.
 
@@ -49,8 +49,10 @@ The game does not expose itself on `window`, so the content script runs in the p
 
 The reward screen stays open beneath the party screen while you choose a reward's target, with its cursor still on the chosen reward. When that reward is a mint, the extension writes the labels into each party slot's description text, the one the game fills with "Able" or "Not able" for a TM. The game builds new slots each time the party screen opens, so the labels never outlast it.
 
-A menu option carries only its label, in the player's language, so the extension reads the biome name files the game loads (`locales/<language>/biomes.json`) to tell which biome each label names. It wraps the option menu's `show` method, and when the biome choice opens the menu, sets the highlight color on the route's options just before the game draws them. The live game reads an option's color from `style` and the beta from `color`, so both are set.
+A menu option carries only its label, in the player's language, so the extension reads the biome name files the game loads (`locales/<language>/biomes.json`) to tell which biome each label names. It wraps the option menu's `show` method, and when the biome choice opens the menu, sets the highlight color on the route's options just before the game draws them.
 
 ## When a game update breaks it
 
 The extension depends on property and method names inside the game. Every one it uses is declared in `src/game-types.ts`, and mirrored game enums live in `src/constants.ts`. If the tooltip stops appearing, the console shows one `[pokerogue-enemy-hover]` error; compare the named member against the current game source. The game itself keeps running either way.
+
+The Meltan route has no error to show when it goes stale. When an update changes biome links, trainer chances, the Scientist's species pool, trainer levels or Meltan's evolution, update the matching rules in `scripts/simulate-meltan-route.ts`, run `pnpm simulate-meltan-route`, and paste its output over `ROUTE_VALUES`.
