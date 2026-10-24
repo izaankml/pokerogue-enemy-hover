@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "PokeRogue Enemy Hover",
+  "version": "0.1.0",
+  "description": "Hover an enemy Pokémon to see its base stats and what catching it would unlock for you, or a starter to see its unlocked natures.",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://pokerogue.net/*",
+        "https://www.pokerogue.net/*",
+        "https://beta.pokerogue.net/*",
+        "http://localhost:8000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pokerogue-enemy-hover@local",
+      "strict_min_version": "128.0"
+    }
+  }
+}
