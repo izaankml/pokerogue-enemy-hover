@@ -160,10 +160,6 @@ export interface SpeciesView {
   getFullUnlocksData(): bigint;
 }
 
-export interface SpeciesFormView {
-  baseStats: readonly number[];
-}
-
 export interface EnemyPokemonView {
   id: number;
   name: string;
@@ -175,11 +171,13 @@ export interface EnemyPokemonView {
   ivs: readonly number[];
   /** The enemy's name panel, which carries the owned icon. */
   battleInfo?: { ownedIcon?: OwnedIconView };
+  /**
+   * The base stats the game computes stats from: a fusion's average of both species, halved in
+   * Spliced Endless when unfused, with challenges and held items applied. Returns a new array.
+   */
+  calculateBaseStats(): number[];
   getDexAttr(): bigint;
-  getSpeciesForm(ignoreOverride?: boolean): SpeciesFormView;
-  getFusionSpeciesForm(ignoreOverride?: boolean): SpeciesFormView;
   getSprite(): SpriteView | undefined;
-  isFusion(): boolean;
   hasTrainer(): boolean;
   isOnField(): boolean;
 }

@@ -41,7 +41,7 @@ export interface SummaryContext {
 }
 
 export function summarizeEnemy(enemy: EnemyPokemonView, context: SummaryContext): EnemySummary {
-  const baseStats = getBaseStats(enemy);
+  const baseStats = enemy.calculateBaseStats();
   return {
     kind: "enemy",
     title: `${enemy.name}  Lv. ${enemy.level}`,
@@ -75,16 +75,6 @@ export function hasNewCatchUnlocks(enemy: EnemyPokemonView, context: SummaryCont
     || addsAbility(enemy, gameData.starterData[rootSpeciesId])
     || addsIvs(enemy, gameData.dexData[species.getRootSpeciesId(true)], context.hasIvScanner)
   );
-}
-
-function getBaseStats(enemy: EnemyPokemonView): number[] {
-  const baseStats = [...enemy.getSpeciesForm(true).baseStats];
-  if (!enemy.isFusion()) {
-    return baseStats;
-  }
-  // Fusions average both species, rounding up, as `Pokemon.calculateBaseStats` does.
-  const fusionBaseStats = enemy.getFusionSpeciesForm(true).baseStats;
-  return baseStats.map((value, statIndex) => Math.ceil((value + (fusionBaseStats[statIndex] ?? value)) / 2));
 }
 
 /**

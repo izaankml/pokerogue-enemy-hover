@@ -2,7 +2,7 @@
 
 A browser extension for [pokerogue.net](https://pokerogue.net). Hovering an enemy Pokémon's sprite in battle shows:
 
-- its base stats and base stat total
+- its base stats and base stat total, as the game computes them: a fusion averages both species, an unfused Pokémon in Spliced Endless has them halved, and challenges such as Flip Stat and items such as vitamins apply
 - its starter's progress: passive, egg moves, cost reduction, natures, shiny variants, and candy against the price of a same-species egg
 
 Trainer Pokémon, gym leaders' included, cannot be caught, so they show base stats only.
