@@ -9,10 +9,17 @@ Trainer Pokémon, gym leaders' included, cannot be caught, so they show base sta
 
 The game grays out the Poké Ball next to an enemy's name when catching it would unlock a new form, gender, shiny tier or ability. The extension grays it out for a new nature as well, for a perfect 31 IV your starter does not have yet, and, while you hold the IV Scanner, for any IV higher than your starter's.
 
+Hovering a grayed-out Poké Ball lists what the catch would unlock: the shiny tier, gender, form, ability or hidden ability, nature and IVs.
+
+- **Green**: the starter gains it.
+- **Orange**: the starter already has it, but this later stage of the line does not.
+
+Abilities and IVs are saved to the starter, so they are always green. The list reads "Nothing new" when the game grays out the Poké Ball for a form that a catch cannot unlock. A trainer's Pokémon shows no list.
+
 After you choose a mint as a reward, the party screen labels each slot in place of its HP bar, the way the game labels slots for a TM:
 
-- **New nature** in green: the mint unlocks the nature for a starter in the Pokémon's line.
-- **New nature** in orange: the starter already has the nature, but a later stage up to this Pokémon does not.
+- **New Nature** in green: the mint unlocks the nature for a starter in the Pokémon's line.
+- **New Nature** in orange: the starter already has the nature, but a later stage up to this Pokémon does not.
 - **Owned**: every stage up to this Pokémon already has the nature.
 - **No effect**: the Pokémon already has the mint's nature.
 

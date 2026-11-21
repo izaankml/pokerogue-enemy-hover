@@ -27,8 +27,8 @@ interface SlotLabel {
  * starter, `PERFECT_IV` for one new only to a later stage, and the label's own `MESSAGE` otherwise.
  */
 const SLOT_LABELS = {
-  newForStarter: { text: "New nature", fill: "#78c850", shadow: "#306850" },
-  newForEvolution: { text: "New nature", fill: "#f8b050", shadow: "#c07800" },
+  newForStarter: { text: "New Nature", fill: "#78c850", shadow: "#306850" },
+  newForEvolution: { text: "New Nature", fill: "#f8b050", shadow: "#c07800" },
   owned: { text: "Owned", fill: "#f8f8f8", shadow: "#6b5a73" },
   noEffect: { text: "No effect", fill: "#f8f8f8", shadow: "#6b5a73" },
 } as const satisfies Record<string, SlotLabel>;

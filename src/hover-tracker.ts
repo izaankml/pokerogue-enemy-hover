@@ -1,4 +1,5 @@
 import { highlightMeltanRouteBiomes } from "./biome-select.ts";
+import { summarizeCatchUnlocks } from "./catch-unlocks.ts";
 import {
   BATTLE_UI_HANDLER_NAMES,
   CONFIRM_UI_HANDLER_NAME,
@@ -11,7 +12,7 @@ import type { BattleSceneView, EnemyPokemonView, PhaserGameView, SpriteView, UiH
 import { type GameRectangle, isInside } from "./geometry.ts";
 import { labelPartySlotsForMint } from "./mint-labels.ts";
 import { HoverOverlay, type OverlaySummary } from "./overlay.ts";
-import { tintOwnedIconsForNewUnlocks } from "./owned-icon.ts";
+import { findEnemyWithGrayOwnedIconAt, tintOwnedIconsForNewUnlocks } from "./owned-icon.ts";
 import { findHoveredStarter, summarizeStarter } from "./starter-select.ts";
 import { findStarterSpecies } from "./starter-species.ts";
 import { readWindowStyle } from "./window-style.ts";
@@ -36,7 +37,7 @@ interface CanvasPoint {
   uiPixelSize: number;
 }
 
-/** An enemy or starter under the pointer. */
+/** An enemy, an enemy's grayed-out owned icon, or a starter under the pointer. */
 interface HoverTarget {
   /** Identifies the target, so the overlay is rebuilt only when the target changes. */
   key: string;
@@ -144,6 +145,14 @@ function findHoverTarget(
   hitTester: EnemyHitTester,
 ): HoverTarget | null {
   if (battle && isBattleUiShown(battleScene)) {
+    const iconEnemy = findEnemyWithGrayOwnedIconAt(battleScene, gameX, gameY);
+    if (iconEnemy) {
+      return {
+        key: `unlocks:${iconEnemy.id}`,
+        buildSummary: () => summarizeCatchUnlocks(iconEnemy, battle.summaryContext),
+        uiPixelSize,
+      };
+    }
     const enemy = hitTester.find(battleScene, gameX, gameY);
     return (
       enemy && {

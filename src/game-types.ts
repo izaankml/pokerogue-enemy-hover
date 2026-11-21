@@ -158,6 +158,8 @@ export interface SpeciesView {
   /** Every earlier stage of the species' line, each with the level it evolves at. */
   getPrevolutionLevels(): readonly (readonly [speciesId: number, level: number])[];
   getFullUnlocksData(): bigint;
+  /** Localized name of one of the species' forms, which is empty for some base forms. */
+  getFormNameToDisplay(formIndex?: number): string;
 }
 
 export interface EnemyPokemonView {
@@ -166,11 +168,12 @@ export interface EnemyPokemonView {
   level: number;
   visible: boolean;
   species: SpeciesView;
+  formIndex: number;
   abilityIndex: number;
   nature: number;
   ivs: readonly number[];
   /** The enemy's name panel, which carries the owned icon. */
-  battleInfo?: { ownedIcon?: OwnedIconView };
+  battleInfo?: { visible: boolean; ownedIcon?: OwnedIconView };
   /**
    * The base stats the game computes stats from: a fusion's average of both species, halved in
    * Spliced Endless when unfused, with challenges and held items applied. Returns a new array.
@@ -193,6 +196,7 @@ export interface OwnedIconView {
   visible: boolean;
   tintTopLeft: number;
   setTint(color: number): unknown;
+  getBounds(): { contains(x: number, y: number): boolean };
 }
 
 export interface SpriteView {

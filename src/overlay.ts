@@ -1,9 +1,13 @@
+import type { CatchUnlocksSummary } from "./catch-unlocks.ts";
 import type { BaseStat, EnemySummary, ProgressItem } from "./enemy-summary.ts";
 import type { StarterSummary } from "./starter-select.ts";
 import type { WindowStyle } from "./window-style.ts";
 
-/** What the overlay describes: an enemy in battle, or a starter on the starter select screen. */
-export type OverlaySummary = EnemySummary | StarterSummary;
+/**
+ * What the overlay describes: an enemy in battle, what catching it would unlock, or a starter on
+ * the starter select screen.
+ */
+export type OverlaySummary = EnemySummary | CatchUnlocksSummary | StarterSummary;
 
 const CLASS_PREFIX = "peh";
 /** The game draws its 320-pixel-wide UI layout onto a canvas six times as wide. */
@@ -27,7 +31,8 @@ const TEXT_KINDS = {
 type TextKind = keyof typeof TEXT_KINDS;
 
 type Theme = "modern" | "legacy" | "fallback";
-type TextTone = "text" | "heading" | "good" | "missing";
+/** `evolution` marks an unlock that only a later stage of a starter's line gains. */
+type TextTone = "text" | "heading" | "good" | "evolution" | "missing";
 type GameTextFactory = (content: string, tone: TextTone, kind: TextKind) => HTMLCanvasElement;
 
 interface TextColors {
@@ -44,6 +49,7 @@ const MODERN_PALETTE: Record<TextTone, TextColors> = {
   text: { fill: "#f8f8f8", shadow: "#6b5a73" },
   heading: { fill: "#f8b050", shadow: "#c07800" },
   good: { fill: "#78c850", shadow: "#306850" },
+  evolution: { fill: "#f8b050", shadow: "#c07800" },
   missing: { fill: "#f89890", shadow: "#984038" },
 };
 const PALETTES: Record<Theme, Record<TextTone, TextColors>> = {
@@ -53,6 +59,7 @@ const PALETTES: Record<Theme, Record<TextTone, TextColors>> = {
     text: { fill: "#404040", shadow: "#ded6b5" },
     heading: { fill: "#a86000", shadow: "#f0d8a8" },
     good: { fill: "#2f8030", shadow: "#c0e0b8" },
+    evolution: { fill: "#a86000", shadow: "#f0d8a8" },
     missing: { fill: "#c04010", shadow: "#f8c8b0" },
   },
 };
@@ -153,6 +160,7 @@ const STYLES = `
   column-gap: calc(var(--peh-px) * 4);
 }
 .${CLASS_PREFIX}-progress > :nth-child(3n) { justify-self: end; }
+.${CLASS_PREFIX}-unlocks { display: flex; flex-direction: column; align-items: center; }
 .${CLASS_PREFIX}-centered { margin-inline: auto; }
 `;
 
@@ -239,11 +247,38 @@ function renderSummary(
 
   const tab = createElement("div", "tab");
   tab.append(text(summary.title, "text", "title"));
-  return [tab, ...(summary.kind === "enemy" ? renderEnemyBody(summary, text) : renderStarterBody(summary, text))];
+  return [tab, ...renderBody(summary, text)];
+}
+
+function renderBody(summary: OverlaySummary, text: GameTextFactory): HTMLElement[] {
+  switch (summary.kind) {
+    case "enemy":
+      return renderEnemyBody(summary, text);
+    case "unlocks":
+      return renderUnlocksBody(summary, text);
+    case "starter":
+      return renderStarterBody(summary, text);
+  }
 }
 
 function renderStarterBody(summary: StarterSummary, text: GameTextFactory): HTMLElement[] {
   return [withClass(text(summary.natures.text, getProgressTone(summary.natures), "body"), "centered")];
+}
+
+/**
+ * Green for an unlock a starter gains, orange for one only a later stage gains. The list is empty
+ * when the game grays out the owned icon for something a catch cannot unlock.
+ */
+function renderUnlocksBody(summary: CatchUnlocksSummary, text: GameTextFactory): HTMLElement[] {
+  const list = createElement("div", "unlocks");
+  if (summary.unlocks.length === 0) {
+    list.append(text("Nothing new", "text", "body"));
+  } else {
+    list.append(
+      ...summary.unlocks.map(unlock => text(unlock.text, unlock.scope === "starter" ? "good" : "evolution", "body")),
+    );
+  }
+  return [list];
 }
 
 function renderEnemyBody(summary: EnemySummary, text: GameTextFactory): HTMLElement[] {

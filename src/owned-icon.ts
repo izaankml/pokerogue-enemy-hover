@@ -1,5 +1,6 @@
+import { hasNewCatchUnlocks } from "./catch-unlocks.ts";
 import { OWNED_ICON_NEW_UNLOCK_TINT } from "./constants.ts";
-import { hasNewCatchUnlocks, type SummaryContext } from "./enemy-summary.ts";
+import type { SummaryContext } from "./enemy-summary.ts";
 import type { BattleSceneView, EnemyPokemonView } from "./game-types.ts";
 
 /** How often each enemy is checked again, since a catch elsewhere can change what is new. */
@@ -27,4 +28,26 @@ export function tintOwnedIconsForNewUnlocks(battleScene: BattleSceneView, contex
       ownedIcon.setTint(OWNED_ICON_NEW_UNLOCK_TINT);
     }
   }
+}
+
+/**
+ * Finds the wild enemy whose grayed-out owned icon is under the pointer. A trainer's Pokémon is
+ * left out, since it cannot be caught.
+ */
+export function findEnemyWithGrayOwnedIconAt(
+  battleScene: BattleSceneView,
+  gameX: number,
+  gameY: number,
+): EnemyPokemonView | undefined {
+  return battleScene.getEnemyField(true).find(enemy => {
+    const battleInfo = enemy.battleInfo;
+    const ownedIcon = battleInfo?.ownedIcon;
+    return (
+      !!battleInfo?.visible
+      && !!ownedIcon?.visible
+      && ownedIcon.tintTopLeft === OWNED_ICON_NEW_UNLOCK_TINT
+      && !enemy.hasTrainer()
+      && ownedIcon.getBounds().contains(gameX, gameY)
+    );
+  });
 }

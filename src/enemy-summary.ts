@@ -1,8 +1,6 @@
 import {
-  AbilityAttr,
   DexAttr,
   EGG_MOVE_COUNT,
-  MAX_IV,
   NATURE_NAMES,
   PASSIVE_UNLOCKED,
   SAME_SPECIES_EGG_CANDY_COSTS,
@@ -11,7 +9,7 @@ import {
   VALUE_REDUCTION_MAX,
   VARIANT_DEX_ATTRS,
 } from "./constants.ts";
-import type { DexEntryView, EnemyPokemonView, GameDataView, SpeciesView, StarterDataEntryView } from "./game-types.ts";
+import type { DexEntryView, EnemyPokemonView, GameDataView, SpeciesView } from "./game-types.ts";
 
 export interface BaseStat {
   label: string;
@@ -51,60 +49,9 @@ export function summarizeEnemy(enemy: EnemyPokemonView, context: SummaryContext)
   };
 }
 
-/**
- * Whether catching the enemy would save anything new, following `GameData.setPokemonSpeciesCaught`
- * and `AttemptCapturePhase.catch`: dex attributes and natures go to the caught species and every
- * prevolution, abilities go to the starter, and IVs go to the nearest starter in the line.
- * Candy is left out because every catch awards it.
- */
-export function hasNewCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContext): boolean {
-  if (enemy.hasTrainer()) {
-    return false;
-  }
-  const { gameData } = context;
-  const { species } = enemy;
-  const rootSpeciesId = species.getRootSpeciesId();
-  const speciesDexEntry = gameData.dexData[species.speciesId];
-  const rootDexEntry = gameData.dexData[rootSpeciesId];
-  if (!speciesDexEntry?.caughtAttr || !rootDexEntry?.caughtAttr) {
-    return true;
-  }
-  return (
-    addsToDexEntry(enemy, species, speciesDexEntry)
-    || addsToDexEntry(enemy, context.findStarterSpecies(rootSpeciesId), rootDexEntry)
-    || addsAbility(enemy, gameData.starterData[rootSpeciesId])
-    || addsIvs(enemy, gameData.dexData[species.getRootSpeciesId(true)], context.hasIvScanner)
-  );
-}
-
-/**
- * Whether the catch adds a dex attribute or nature to `dexEntry`. Without the species object,
- * only the attributes every species shares can be checked, since form support is per species.
- */
-function addsToDexEntry(enemy: EnemyPokemonView, species: SpeciesView | undefined, dexEntry: DexEntryView): boolean {
-  const obtainableAttr = species?.getFullUnlocksData() ?? SHARED_DEX_ATTR_MASK;
-  const missingAttr = enemy.getDexAttr() & obtainableAttr & ~dexEntry.caughtAttr;
-  return missingAttr !== 0n || !hasNatureUnlocked(dexEntry, enemy.nature);
-}
-
 export function hasNatureUnlocked(dexEntry: DexEntryView, nature: number): boolean {
   // Bit 0 is unused; each nature's bit sits one above its `Nature` value.
   return (dexEntry.natureAttr & (1 << (nature + 1))) !== 0;
-}
-
-function addsAbility(enemy: EnemyPokemonView, starterEntry: StarterDataEntryView | undefined): boolean {
-  // A species without a second ability stores its hidden ability at index 1.
-  const abilityAttr =
-    enemy.abilityIndex !== 1 || enemy.species.ability2 ? 1 << enemy.abilityIndex : AbilityAttr.ABILITY_HIDDEN;
-  return !!starterEntry && !(starterEntry.abilityAttr & abilityAttr);
-}
-
-/** A new perfect IV always counts; smaller gains count only while the IV Scanner reveals IVs. */
-function addsIvs(enemy: EnemyPokemonView, dexEntry: DexEntryView | undefined, hasIvScanner: boolean): boolean {
-  return enemy.ivs.some((iv, statIndex) => {
-    const ownedIv = dexEntry?.ivs[statIndex] ?? 0;
-    return iv > ownedIv && (iv === MAX_IV || hasIvScanner);
-  });
 }
 
 function listStarterProgress(rootSpeciesId: number, { gameData, findStarterSpecies }: SummaryContext): ProgressItem[] {
