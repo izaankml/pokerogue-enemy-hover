@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import * as esbuild from "esbuild";
 
@@ -26,6 +26,7 @@ const buildOptions: esbuild.BuildOptions = {
 
 await mkdir(outputDirectory, { recursive: true });
 await writeFile(projectPath("dist/manifest.json"), `${JSON.stringify({ ...extensionManifest, version }, null, 2)}\n`);
+await cp(projectPath("static/icons"), projectPath("dist/icons"), { recursive: true });
 
 if (process.argv.includes("--watch")) {
   const buildContext = await esbuild.context(buildOptions);

@@ -2,6 +2,12 @@
   "manifest_version": 3,
   "name": "PokeRogue Enemy Hover",
   "description": "Hover an enemy Pokémon to see its base stats and what catching it would unlock for you, or a starter to see its unlocked natures.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "content_scripts": [
     {
       "matches": [
