@@ -144,6 +144,10 @@ function findHoverTarget(
   { gameX, gameY, uiPixelSize }: CanvasPoint,
   hitTester: EnemyHitTester,
 ): HoverTarget | null {
+  // The game's own tooltips, such as an item's, take precedence over the overlay.
+  if (battleScene.ui?.getTooltip().visible) {
+    return null;
+  }
   if (battle && isBattleUiShown(battleScene)) {
     const iconEnemy = findEnemyWithGrayOwnedIconAt(battleScene, gameX, gameY);
     if (iconEnemy) {

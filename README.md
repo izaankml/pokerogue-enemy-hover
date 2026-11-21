@@ -33,7 +33,7 @@ Biomes within 2% of the best are colored as well. When no offered biome still re
 
 On the starter select screen, hovering a caught starter shows how many of the 25 natures it has unlocked. The tooltip stays hidden while a menu, filter dropdown or message covers the grid.
 
-The tooltip uses the game's current window type and UI theme (modern or legacy). The extension reads your save data from the running game; the Poké Ball tint, the mint labels and the biome choice colors are the only things it changes.
+The tooltip uses the game's current window type and UI theme (modern or legacy). It stays hidden while one of the game's own tooltips is shown, such as an item's. The extension reads your save data from the running game; the Poké Ball tint, the mint labels and the biome choice colors are the only things it changes.
 
 ## Install
 

@@ -23,6 +23,8 @@ export interface BattleSceneView {
 
 export interface UiView {
   getHandler(): object | undefined;
+  /** The game's own tooltip, which items and battle info icons show on hover. */
+  getTooltip(): { visible: boolean };
   /** Every UI handler, indexed by `UiMode`. */
   handlers?: readonly (UiHandlerView | undefined)[];
   /** Window behind the game's own tooltips, textured with the current window style and theme. */
