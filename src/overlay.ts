@@ -19,14 +19,17 @@ const VIEWPORT_MARGIN = 8;
 const STAT_BAR_MAX = 200;
 
 /**
- * Text sizes and shadow offsets in game canvas pixels, as the game's arena flyout draws its
- * header (`BATTLE_INFO` at 54), column headings (the `SUMMARY_*` styles at 54) and effect lines
- * (`BATTLE_INFO` at 48). Shadow offsets come from `getTextStyleOptions` in `src/ui/text.ts`.
+ * Text sizes, line heights and shadow offsets in game canvas pixels. The game's arena flyout draws
+ * its header (`BATTLE_INFO` at 54), column headings (the `SUMMARY_*` styles at 54) and effect lines
+ * (`BATTLE_INFO` at 48) one font size apart. Its tooltip draws `TOOLTIP_CONTENT` at 64, with lines
+ * 63 apart, since its window grows by 10.5 UI pixels a line. Shadow offsets come from
+ * `getTextStyleOptions` in `src/ui/text.ts`.
  */
 const TEXT_KINDS = {
-  title: { fontSize: 54, shadowOffset: 3.5 },
-  heading: { fontSize: 54, shadowOffset: 3 },
-  body: { fontSize: 48, shadowOffset: 3.5 },
+  title: { fontSize: 54, lineHeight: 54, shadowOffset: 3.5 },
+  heading: { fontSize: 54, lineHeight: 54, shadowOffset: 3 },
+  body: { fontSize: 48, lineHeight: 48, shadowOffset: 3.5 },
+  tooltip: { fontSize: 64, lineHeight: 63, shadowOffset: 3 },
 } as const;
 type TextKind = keyof typeof TEXT_KINDS;
 
@@ -89,6 +92,15 @@ const STYLES = `
   pointer-events: none;
 }
 .${CLASS_PREFIX}-root[data-kind="enemy"] { min-width: calc(var(--peh-px) * 120); }
+/*
+ * Laid out like the game's own tooltip: its regular window with no tab, text 6 UI pixels from the
+ * sides and 4 from the top, and a window 19 UI pixels tall for one line.
+ */
+.${CLASS_PREFIX}-root[data-kind="unlocks"] {
+  margin-top: 0;
+  padding: 0 calc(var(--peh-px) * 2) calc(var(--peh-px) * 0.5);
+  border-image-source: var(--peh-tooltip-window);
+}
 .${CLASS_PREFIX}-root[data-theme="legacy"] { --peh-bar-track: rgba(0, 0, 0, 0.12); }
 .${CLASS_PREFIX}-root[data-theme="fallback"] {
   border: 2px solid #5b6478;
@@ -160,7 +172,6 @@ const STYLES = `
   column-gap: calc(var(--peh-px) * 4);
 }
 .${CLASS_PREFIX}-progress > :nth-child(3n) { justify-self: end; }
-.${CLASS_PREFIX}-unlocks { display: flex; flex-direction: column; align-items: center; }
 .${CLASS_PREFIX}-centered { margin-inline: auto; }
 `;
 
@@ -176,6 +187,8 @@ export class HoverOverlay {
   private element: HTMLDivElement | null = null;
   private renderedKey: string | null = null;
   private appearanceKey = "";
+  /** Whether the rendered window opens right of the pointer, as the game's own tooltips do. */
+  private opensRightOfPointer = false;
 
   /** Shows the summary next to the pointer, rebuilding it only when the target, theme or scale changes. */
   show(
@@ -193,10 +206,11 @@ export class HoverOverlay {
       const canvasPixelSize = appearance.uiPixelSize / CANVAS_PIXELS_PER_UI_PIXEL;
       element.dataset.kind = summary.kind;
       element.replaceChildren(...renderSummary(summary, PALETTES[theme], canvasPixelSize));
+      this.opensRightOfPointer = summary.kind === "unlocks";
       this.renderedKey = renderKey;
     }
     element.style.display = "block";
-    positionNearPointer(element, clientX, clientY, appearance.uiPixelSize);
+    positionNearPointer(element, clientX, clientY, appearance.uiPixelSize, this.opensRightOfPointer);
   }
 
   hide(): void {
@@ -221,6 +235,7 @@ export class HoverOverlay {
     if (windowStyle) {
       element.style.setProperty("--peh-window", `url("${windowStyle.windowImageUrl}")`);
       element.style.setProperty("--peh-tab-window", `url("${windowStyle.tabImageUrl}")`);
+      element.style.setProperty("--peh-tooltip-window", `url("${windowStyle.tooltipImageUrl}")`);
       element.style.setProperty("--peh-border", String(windowStyle.borderSize));
     }
     return theme;
@@ -244,21 +259,21 @@ function renderSummary(
   canvasPixelSize: number,
 ): HTMLElement[] {
   const text: GameTextFactory = (content, tone, kind) => createGameText(content, palette[tone], kind, canvasPixelSize);
-
-  const tab = createElement("div", "tab");
-  tab.append(text(summary.title, "text", "title"));
-  return [tab, ...renderBody(summary, text)];
-}
-
-function renderBody(summary: OverlaySummary, text: GameTextFactory): HTMLElement[] {
   switch (summary.kind) {
     case "enemy":
-      return renderEnemyBody(summary, text);
-    case "unlocks":
-      return renderUnlocksBody(summary, text);
+      return [renderTab(summary.title, text), ...renderEnemyBody(summary, text)];
     case "starter":
-      return renderStarterBody(summary, text);
+      return [renderTab(summary.title, text), ...renderStarterBody(summary, text)];
+    case "unlocks":
+      // Like the game's own tooltips, the list has no title.
+      return renderUnlocksBody(summary, text);
   }
+}
+
+function renderTab(title: string, text: GameTextFactory): HTMLElement {
+  const tab = createElement("div", "tab");
+  tab.append(text(title, "text", "title"));
+  return tab;
 }
 
 function renderStarterBody(summary: StarterSummary, text: GameTextFactory): HTMLElement[] {
@@ -266,19 +281,17 @@ function renderStarterBody(summary: StarterSummary, text: GameTextFactory): HTML
 }
 
 /**
- * Green for an unlock a starter gains, orange for one only a later stage gains. The list is empty
- * when the game grays out the owned icon for something a catch cannot unlock.
+ * One line of tooltip text per unlock, green for one a starter gains and orange for one only a
+ * later stage gains. The list is empty when the game grays out the owned icon for something a
+ * catch cannot unlock.
  */
 function renderUnlocksBody(summary: CatchUnlocksSummary, text: GameTextFactory): HTMLElement[] {
-  const list = createElement("div", "unlocks");
   if (summary.unlocks.length === 0) {
-    list.append(text("Nothing new", "text", "body"));
-  } else {
-    list.append(
-      ...summary.unlocks.map(unlock => text(unlock.text, unlock.scope === "starter" ? "good" : "evolution", "body")),
-    );
+    return [text("Nothing new", "text", "tooltip")];
   }
-  return [list];
+  return summary.unlocks.map(unlock =>
+    text(unlock.text, unlock.scope === "starter" ? "good" : "evolution", "tooltip"),
+  );
 }
 
 function renderEnemyBody(summary: EnemySummary, text: GameTextFactory): HTMLElement[] {
@@ -323,7 +336,7 @@ function getProgressTone(item: ProgressItem): TextTone {
  * so the browser renders it the same way as the game's text.
  */
 function createGameText(text: string, colors: TextColors, kind: TextKind, canvasPixelSize: number): HTMLCanvasElement {
-  const { fontSize, shadowOffset } = TEXT_KINDS[kind];
+  const { fontSize, lineHeight, shadowOffset } = TEXT_KINDS[kind];
   const canvas = document.createElement("canvas");
   canvas.setAttribute("role", "img");
   canvas.setAttribute("aria-label", text);
@@ -345,25 +358,37 @@ function createGameText(text: string, colors: TextColors, kind: TextKind, canvas
   context.fillText(text, 0, fontSize * 0.8125);
   canvas.style.width = `${canvas.width * canvasPixelSize}px`;
   canvas.style.height = `${canvas.height * canvasPixelSize}px`;
-  // Rows are spaced by the font size alone; the shadow below the last line overhangs it.
-  canvas.style.marginBottom = `${(fontSize - canvas.height) * canvasPixelSize}px`;
+  // Rows are spaced by the line height alone; the shadow below the last line overhangs it.
+  canvas.style.marginBottom = `${(lineHeight - canvas.height) * canvasPixelSize}px`;
   return canvas;
 }
 
 /**
- * Places the window just below and left of the pointer. Enemies stand on the right of the battle
- * field, so that side has room for every enemy, and the overlay stays put when moving between the
- * two enemies of a double battle. The starter grid also sits right of centre on its screen. Like
- * the game's tooltips, the window moves right of the pointer or above it where it would not fit.
+ * Places the window just below the pointer, on its left unless `opensRight` is set. Enemies stand
+ * on the right of the battle field, so the left side has room for every enemy, and the overlay
+ * stays put when moving between the two enemies of a double battle. The starter grid also sits
+ * right of centre on its screen. The catch unlocks window opens on the right, as the game's own
+ * tooltips do. Like those, the window moves to the pointer's other side or above it where it would
+ * not fit.
  */
-function positionNearPointer(element: HTMLElement, clientX: number, clientY: number, uiPixelSize: number): void {
+function positionNearPointer(
+  element: HTMLElement,
+  clientX: number,
+  clientY: number,
+  uiPixelSize: number,
+  opensRight: boolean,
+): void {
   const gap = POINTER_GAP * uiPixelSize;
   // The element's box starts at the window's frame; the tab rises above it by the top margin.
   const { width, height } = element.getBoundingClientRect();
   const tabRise = Number.parseFloat(getComputedStyle(element).marginTop) || 0;
-  let left = clientX - gap - width;
-  if (left < VIEWPORT_MARGIN) {
-    left = clientX + gap;
+  const leftOfPointer = clientX - gap - width;
+  const rightOfPointer = clientX + gap;
+  let left: number;
+  if (opensRight) {
+    left = rightOfPointer + width > window.innerWidth - VIEWPORT_MARGIN ? leftOfPointer : rightOfPointer;
+  } else {
+    left = leftOfPointer < VIEWPORT_MARGIN ? rightOfPointer : leftOfPointer;
   }
   let windowTop = clientY + gap;
   if (windowTop + height > window.innerHeight - VIEWPORT_MARGIN) {

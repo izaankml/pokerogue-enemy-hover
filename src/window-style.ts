@@ -9,6 +9,8 @@ export interface WindowStyle {
   windowImageUrl: string;
   /** Data URL of the extra-thin window, which the arena flyout uses for its header tab. */
   tabImageUrl: string;
+  /** Data URL of the regular window, which the game's own tooltip uses. */
+  tooltipImageUrl: string;
   /** Nine-slice border size in texture pixels, the same for every window variant. */
   borderSize: number;
 }
@@ -37,6 +39,7 @@ export function readWindowStyle(battleScene: BattleSceneView): WindowStyle | nul
     isLegacy,
     windowImageUrl,
     tabImageUrl: readTextureImageUrl(battleScene, `${windowTypeKey}_xthin${themeSuffix}`) ?? windowImageUrl,
+    tooltipImageUrl: readTextureImageUrl(battleScene, textureKey) ?? windowImageUrl,
     borderSize: isLegacy ? LEGACY_WINDOW_BORDER_SIZE : WINDOW_BORDER_SIZE,
   };
 }

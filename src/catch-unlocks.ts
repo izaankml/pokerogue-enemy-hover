@@ -12,7 +12,6 @@ export interface CatchUnlock {
 
 export interface CatchUnlocksSummary {
   kind: "unlocks";
-  title: string;
   unlocks: CatchUnlock[];
 }
 
@@ -26,7 +25,7 @@ const FORM_DEX_ATTR_MASK = ~SHARED_DEX_ATTR_MASK;
 const UNCAUGHT_DEX_ENTRY: DexEntryView = { seenCount: 0, caughtAttr: 0n, natureAttr: 0, ivs: [] };
 
 export function summarizeCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContext): CatchUnlocksSummary {
-  return { kind: "unlocks", title: "Catch Unlocks", unlocks: listCatchUnlocks(enemy, context) };
+  return { kind: "unlocks", unlocks: listCatchUnlocks(enemy, context) };
 }
 
 /** Whether catching the enemy would save anything new. Candy is left out because every catch awards it. */

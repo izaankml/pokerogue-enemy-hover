@@ -9,7 +9,7 @@ Trainer Pokémon, gym leaders' included, cannot be caught, so they show base sta
 
 The game grays out the Poké Ball next to an enemy's name when catching it would unlock a new form, gender, shiny tier or ability. The extension grays it out for a new nature as well, for a perfect 31 IV your starter does not have yet, and, while you hold the IV Scanner, for any IV higher than your starter's.
 
-Hovering a grayed-out Poké Ball lists what the catch would unlock: the shiny tier, gender, form, ability or hidden ability, nature and IVs.
+Hovering a grayed-out Poké Ball lists what the catch would unlock: the shiny tier, gender, form, ability or hidden ability, nature and IVs. The list appears in a window like the game's own tooltips, such as the one that shows an enemy's generation when you hover its name.
 
 - **Green**: the starter gains it.
 - **Orange**: the starter already has it, but this later stage of the line does not.
