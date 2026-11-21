@@ -1,4 +1,4 @@
-import { AbilityAttr, DexAttr, MAX_IV, NATURE_NAMES, SHARED_DEX_ATTR_MASK, STAT_LABELS } from "./constants.ts";
+import { AbilityAttr, DexAttr, MAX_IV, SHARED_DEX_ATTR_MASK } from "./constants.ts";
 import { hasNatureUnlocked, type SummaryContext } from "./enemy-summary.ts";
 import type { DexEntryView, EnemyPokemonView, SpeciesView } from "./game-types.ts";
 
@@ -34,8 +34,8 @@ export function hasNewCatchUnlocks(enemy: EnemyPokemonView, context: SummaryCont
 }
 
 /**
- * What catching the enemy would save, following `GameData.setPokemonSpeciesCaught` and
- * `AttemptCapturePhase.catch`: dex attributes and natures go to the caught species and every
+ * What catching the enemy would save, by kind of unlock, following `GameData.setPokemonSpeciesCaught`
+ * and `AttemptCapturePhase.catch`: dex attributes and natures go to the caught species and every
  * prevolution, abilities go to the starter, and IVs go to the nearest starter in the line.
  */
 export function listCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContext): CatchUnlock[] {
@@ -50,23 +50,23 @@ export function listCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContex
   // Only starters have starter data. A starter such as Pikachu can itself evolve from another one.
   const speciesGainScope: UnlockScope = gameData.starterData[species.speciesId] ? "starter" : "evolution";
   const unlocks: CatchUnlock[] = [];
-  const addUnlock = (gainedByRoot: boolean, gainedBySpecies: boolean, describe: () => string): void => {
+  const addUnlock = (text: string, gainedByRoot: boolean, gainedBySpecies: boolean): void => {
     const scope = gainedByRoot ? "starter" : gainedBySpecies ? speciesGainScope : null;
     if (scope) {
-      unlocks.push({ text: describe(), scope });
+      unlocks.push({ text, scope });
     }
   };
 
   const dexAttr = enemy.getDexAttr();
   const rootMissingAttr = getMissingDexAttr(dexAttr, context.findStarterSpecies(rootSpeciesId), rootDexEntry);
   const speciesMissingAttr = getMissingDexAttr(dexAttr, species, speciesDexEntry);
-  const dexAttrGroups: [attr: bigint, describe: () => string][] = [
-    [dexAttr & SHININESS_DEX_ATTR_MASK, () => describeShininess(dexAttr)],
-    [dexAttr & GENDER_DEX_ATTR_MASK, () => (dexAttr & DexAttr.FEMALE ? "Female" : "Male")],
-    [dexAttr & FORM_DEX_ATTR_MASK, () => describeForm(species, enemy.formIndex)],
+  const dexAttrGroups: [text: string, attr: bigint][] = [
+    [describeShininess(dexAttr), dexAttr & SHININESS_DEX_ATTR_MASK],
+    ["Gender", dexAttr & GENDER_DEX_ATTR_MASK],
+    ["Form", dexAttr & FORM_DEX_ATTR_MASK],
   ];
-  for (const [attr, describe] of dexAttrGroups) {
-    addUnlock((rootMissingAttr & attr) !== 0n, (speciesMissingAttr & attr) !== 0n, describe);
+  for (const [text, attr] of dexAttrGroups) {
+    addUnlock(text, (rootMissingAttr & attr) !== 0n, (speciesMissingAttr & attr) !== 0n);
   }
 
   // A species without a second ability stores its hidden ability at index 1.
@@ -74,22 +74,21 @@ export function listCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContex
     enemy.abilityIndex !== 1 || species.ability2 ? 1 << enemy.abilityIndex : AbilityAttr.ABILITY_HIDDEN;
   const rootStarterEntry = gameData.starterData[rootSpeciesId];
   addUnlock(
+    abilityAttr === AbilityAttr.ABILITY_HIDDEN ? "Hidden Ability" : "Ability",
     !!rootStarterEntry && !(rootStarterEntry.abilityAttr & abilityAttr),
     false,
-    () => (abilityAttr === AbilityAttr.ABILITY_HIDDEN ? "Hidden Ability" : "Ability"),
   );
 
   addUnlock(
+    "Nature",
     !hasNatureUnlocked(rootDexEntry, enemy.nature),
     !hasNatureUnlocked(speciesDexEntry, enemy.nature),
-    () => `${NATURE_NAMES[enemy.nature] ?? "New"} Nature`,
   );
 
-  const improvedIvs = listImprovedIvs(enemy, gameData.dexData[species.getRootSpeciesId(true)], context.hasIvScanner);
   addUnlock(
-    improvedIvs.length > 0,
+    "IV",
+    hasImprovedIv(enemy, gameData.dexData[species.getRootSpeciesId(true)], context.hasIvScanner),
     false,
-    () => `${improvedIvs.length === 1 ? "IV" : "IVs"}: ${improvedIvs.join(", ")}`,
   );
 
   return unlocks;
@@ -104,7 +103,10 @@ function getMissingDexAttr(dexAttr: bigint, species: SpeciesView | undefined, de
   return dexAttr & obtainableAttr & ~dexEntry.caughtAttr;
 }
 
-/** Worded as the game's tooltip on a shiny icon, with the tier names from `getShinyDescriptor`. */
+/**
+ * Names the shiny tier, as the shiny icon beside the enemy's name shows it, worded as the game's
+ * tooltip on that icon with the tier names from `getShinyDescriptor`.
+ */
 function describeShininess(dexAttr: bigint): string {
   if (!(dexAttr & DexAttr.SHINY)) {
     return "Not Shiny";
@@ -115,15 +117,10 @@ function describeShininess(dexAttr: bigint): string {
   return dexAttr & DexAttr.VARIANT_2 ? "Shiny (Rare)" : "Shiny";
 }
 
-function describeForm(species: SpeciesView, formIndex: number): string {
-  const formName = species.getFormNameToDisplay(formIndex);
-  return formName ? `Form: ${formName}` : "Form";
-}
-
-/** Stats whose IV beats the starter's: any perfect IV, and smaller gains while the IV Scanner reveals IVs. */
-function listImprovedIvs(enemy: EnemyPokemonView, dexEntry: DexEntryView | undefined, hasIvScanner: boolean): string[] {
-  return enemy.ivs.flatMap((iv, statIndex) => {
+/** Whether an IV beats the starter's: any perfect IV, and smaller gains while the IV Scanner reveals IVs. */
+function hasImprovedIv(enemy: EnemyPokemonView, dexEntry: DexEntryView | undefined, hasIvScanner: boolean): boolean {
+  return enemy.ivs.some((iv, statIndex) => {
     const ownedIv = dexEntry?.ivs[statIndex] ?? 0;
-    return iv > ownedIv && (iv === MAX_IV || hasIvScanner) ? [`${STAT_LABELS[statIndex] ?? "?"} ${iv}`] : [];
+    return iv > ownedIv && (iv === MAX_IV || hasIvScanner);
   });
 }

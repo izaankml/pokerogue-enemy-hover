@@ -160,8 +160,6 @@ export interface SpeciesView {
   /** Every earlier stage of the species' line, each with the level it evolves at. */
   getPrevolutionLevels(): readonly (readonly [speciesId: number, level: number])[];
   getFullUnlocksData(): bigint;
-  /** Localized name of one of the species' forms, which is empty for some base forms. */
-  getFormNameToDisplay(formIndex?: number): string;
 }
 
 export interface EnemyPokemonView {
@@ -170,7 +168,6 @@ export interface EnemyPokemonView {
   level: number;
   visible: boolean;
   species: SpeciesView;
-  formIndex: number;
   abilityIndex: number;
   nature: number;
   ivs: readonly number[];
