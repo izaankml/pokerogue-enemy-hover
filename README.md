@@ -50,6 +50,8 @@ Reload the game tab afterwards. The DevTools console shows `[pokerogue-enemy-hov
 
 For development, `pnpm watch` rebuilds on change; reload the extension and the game tab to pick up a new build.
 
+The icon is pixel art drawn by `scripts/generate-icons.ts`. To change it, edit the drawing there and run `pnpm generate-icons`, which rewrites the PNGs in `static/icons/`.
+
 ## How it works
 
 The game does not expose itself on `window`, so the content script runs in the page's own JavaScript context before any page script (`world: "MAIN"`, `run_at: "document_start"`). It installs a setter on `Object.prototype` for `domContainer`, a property that only the Phaser `Game` constructor assigns. The first assignment hands over the game instance, and the setter removes itself. From there the extension reads the `battle` scene each frame, hit-tests the pointer against the enemy sprites or the starter select grid cells, and draws the tooltip as a DOM element over the canvas. The tooltip's frame is the texture of the game's own tooltip window, whose key carries a `_legacy` suffix in the legacy theme.

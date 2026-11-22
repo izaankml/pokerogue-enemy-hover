@@ -1,6 +1,6 @@
 {
   "name": "pokerogue-enemy-hover",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Browser extension that shows base stats and missing unlocks when hovering an enemy in PokeRogue",
   "type": "module",
@@ -8,7 +8,8 @@
     "build": "node scripts/build.ts",
     "watch": "node scripts/build.ts --watch",
     "typecheck": "tsc --noEmit",
-    "simulate-meltan-route": "node scripts/simulate-meltan-route.ts"
+    "simulate-meltan-route": "node scripts/simulate-meltan-route.ts",
+    "generate-icons": "node scripts/generate-icons.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
