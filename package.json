@@ -9,7 +9,8 @@
     "watch": "node scripts/build.ts --watch",
     "typecheck": "tsc --noEmit",
     "simulate-meltan-route": "node scripts/simulate-meltan-route.ts",
-    "generate-icons": "node scripts/generate-icons.ts"
+    "generate-icons": "node scripts/generate-icons.ts",
+    "battle-search": "node scripts/battle-search/run.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.3",
