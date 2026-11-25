@@ -2,6 +2,3 @@ node_modules/
 dist/
 # PokeRogue save exports
 *.prsv
-# Battle search output
-battle-search.log
-battle-search.line.json

@@ -13,7 +13,5 @@
     "verbatimModuleSyntax": true,
     "skipLibCheck": true
   },
-  "include": ["src", "scripts"],
-  // Runs inside the PokeRogue repo, whose path aliases resolve only there.
-  "exclude": ["scripts/battle-search/game"]
+  "include": ["src", "scripts"]
 }
