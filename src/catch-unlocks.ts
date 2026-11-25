@@ -1,5 +1,5 @@
 import { AbilityAttr, DexAttr, MAX_IV, SHARED_DEX_ATTR_MASK } from "./constants.ts";
-import { hasNatureUnlocked, type SummaryContext } from "./enemy-summary.ts";
+import { hasNatureUnlocked, type SummaryContext, UNCAUGHT_DEX_ENTRY } from "./enemy-summary.ts";
 import type { DexEntryView, EnemyPokemonView, SpeciesView } from "./game-types.ts";
 
 /** Who gains an unlock: a starter, or only the caught species as a later stage of its line. */
@@ -21,8 +21,6 @@ const SHININESS_DEX_ATTR_MASK =
 const GENDER_DEX_ATTR_MASK = DexAttr.MALE | DexAttr.FEMALE;
 /** Form bits start above the bits every species shares. */
 const FORM_DEX_ATTR_MASK = ~SHARED_DEX_ATTR_MASK;
-
-const UNCAUGHT_DEX_ENTRY: DexEntryView = { seenCount: 0, caughtAttr: 0n, natureAttr: 0, ivs: [] };
 
 export function summarizeCatchUnlocks(enemy: EnemyPokemonView, context: SummaryContext): CatchUnlocksSummary {
   return { kind: "unlocks", unlocks: listCatchUnlocks(enemy, context) };

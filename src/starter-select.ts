@@ -1,11 +1,19 @@
 import { STARTER_CELL_AREA, STARTER_SELECT_UI_HANDLER_NAME } from "./constants.ts";
-import { getNatureProgress, type ProgressItem } from "./enemy-summary.ts";
-import type { BattleSceneView, DexEntryView, SpeciesView, StarterSelectUiHandlerView } from "./game-types.ts";
+import { getLineDexEntries, getNatureProgress, type ProgressItem } from "./enemy-summary.ts";
+import type {
+  BattleSceneView,
+  DexEntryView,
+  GameDataView,
+  SpeciesView,
+  StarterSelectUiHandlerView,
+} from "./game-types.ts";
 import { isInside } from "./geometry.ts";
 
 export interface HoveredStarter {
   species: SpeciesView;
   dexEntry: DexEntryView;
+  /** Holds the dex entries of the starter's evolutions. */
+  gameData: GameDataView;
 }
 
 export interface StarterSummary {
@@ -39,14 +47,15 @@ export function findHoveredStarter(battleScene: BattleSceneView, gameX: number, 
     return null;
   }
   const { species } = hoveredContainer;
-  const dexEntry = battleScene.gameData?.dexData[species.speciesId];
-  return dexEntry?.caughtAttr ? { species, dexEntry } : null;
+  const { gameData } = battleScene;
+  const dexEntry = gameData?.dexData[species.speciesId];
+  return gameData && dexEntry?.caughtAttr ? { species, dexEntry, gameData } : null;
 }
 
-export function summarizeStarter({ species, dexEntry }: HoveredStarter): StarterSummary {
+export function summarizeStarter({ species, dexEntry, gameData }: HoveredStarter): StarterSummary {
   return {
     kind: "starter",
     title: species.name,
-    natures: getNatureProgress(dexEntry),
+    natures: getNatureProgress(getLineDexEntries(gameData, dexEntry, species)),
   };
 }

@@ -1,5 +1,5 @@
 import type { CatchUnlocksSummary } from "./catch-unlocks.ts";
-import type { BaseStat, EnemySummary, ProgressItem } from "./enemy-summary.ts";
+import type { BaseStat, EnemySummary, ProgressState } from "./enemy-summary.ts";
 import type { StarterSummary } from "./starter-select.ts";
 import type { WindowStyle } from "./window-style.ts";
 
@@ -34,7 +34,10 @@ const TEXT_KINDS = {
 type TextKind = keyof typeof TEXT_KINDS;
 
 type Theme = "modern" | "legacy" | "fallback";
-/** `evolution` marks an unlock that only a later stage of a starter's line gains. */
+/**
+ * `evolution` marks an unlock that only a later stage of a starter's line gains, or progress that
+ * the starter has completed but a later stage has not.
+ */
 type TextTone = "text" | "heading" | "good" | "evolution" | "missing";
 type GameTextFactory = (content: string, tone: TextTone, kind: TextKind) => HTMLCanvasElement;
 
@@ -65,6 +68,13 @@ const PALETTES: Record<Theme, Record<TextTone, TextColors>> = {
     evolution: { fill: "#a86000", shadow: "#f0d8a8" },
     missing: { fill: "#c04010", shadow: "#f8c8b0" },
   },
+};
+
+const PROGRESS_TONES: Record<ProgressState, TextTone> = {
+  done: "good",
+  starterOnly: "evolution",
+  missing: "missing",
+  info: "text",
 };
 
 // Laid out like the game's arena flyout, in game UI pixels (`--peh-px`): a thin window with the
@@ -277,7 +287,7 @@ function renderTab(title: string, text: GameTextFactory): HTMLElement {
 }
 
 function renderStarterBody(summary: StarterSummary, text: GameTextFactory): HTMLElement[] {
-  return [withClass(text(summary.natures.text, getProgressTone(summary.natures), "body"), "centered")];
+  return [withClass(text(summary.natures.text, PROGRESS_TONES[summary.natures.state], "body"), "centered")];
 }
 
 /**
@@ -308,7 +318,7 @@ function renderEnemyBody(summary: EnemySummary, text: GameTextFactory): HTMLElem
     const progressHeading = createElement("div", "heading-row");
     progressHeading.append(withClass(text("Starter Progress", "heading", "heading"), "heading-title"));
     const progress = createElement("div", "progress");
-    progress.append(...summary.starterProgress.map(item => text(item.text, getProgressTone(item), "body")));
+    progress.append(...summary.starterProgress.map(item => text(item.text, PROGRESS_TONES[item.state], "body")));
     nodes.push(progressHeading, progress);
   }
   return nodes;
@@ -322,12 +332,12 @@ function renderStat(stat: BaseStat, text: GameTextFactory): HTMLElement {
   // Hue runs from red for low stats to cyan for high ones.
   fill.style.background = `hsl(${Math.min(Math.floor((stat.value * 180) / 255), 180)}, 85%, 50%)`;
   bar.append(fill);
-  cell.append(text(stat.label, "text", "body"), bar, withClass(text(String(stat.value), "text", "body"), "stat-value"));
+  cell.append(
+    text(stat.label, PROGRESS_TONES[stat.ivState], "body"),
+    bar,
+    withClass(text(String(stat.value), "text", "body"), "stat-value"),
+  );
   return cell;
-}
-
-function getProgressTone(item: ProgressItem): TextTone {
-  return item.state === "done" ? "good" : item.state === "missing" ? "missing" : "text";
 }
 
 /**

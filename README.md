@@ -5,7 +5,13 @@ A browser extension for [pokerogue.net](https://pokerogue.net). Hovering an enem
 - its base stats and base stat total, as the game computes them: a fusion averages both species, an unfused Pokémon in Spliced Endless has them halved, and challenges such as Flip Stat and items such as vitamins apply
 - its starter's progress: passive, egg moves, cost reduction, natures, shiny variants, and candy against the price of a same-species egg
 
-Trainer Pokémon, gym leaders' included, cannot be caught, so they show base stats only.
+The game saves IVs and natures for each species of a line separately. Catching a Pokémon saves its nature to its own species and every earlier stage, but its IVs only to the starter; evolving one of your Pokémon saves both to the species it evolves into. Each stat name and the Natures count are colored by how far through the line that progress is complete:
+
+- **Green**: the starter and every later stage of its line have a perfect 31 IV in the stat, or every nature.
+- **Orange**: the starter has it, but at least one later stage does not.
+- **Red**: the starter does not have it.
+
+Trainer Pokémon, gym leaders' included, cannot be caught, so they show base stats only, with white stat names. Stat names are also white when you have not caught the line's starter.
 
 The game grays out the Poké Ball next to an enemy's name when catching it would unlock a new form, gender, shiny tier or ability. The extension grays it out for a new nature as well, for a perfect 31 IV your starter does not have yet, and, while you hold the IV Scanner, for any IV higher than your starter's.
 
@@ -31,7 +37,7 @@ The ranking comes from a simulation of the game's rules: random trainer waves, t
 
 Biomes within 2% of the best are colored as well. When no offered biome still reaches a Scientist before Meltan evolves, none is colored.
 
-On the starter select screen, hovering a caught starter shows how many of the 25 natures it has unlocked. The tooltip stays hidden while a menu, filter dropdown or message covers the grid.
+On the starter select screen, hovering a caught starter shows how many of the 25 natures it has unlocked, colored green, orange or red in the same way. The tooltip stays hidden while a menu, filter dropdown or message covers the grid.
 
 The tooltip uses the game's current window type and UI theme (modern or legacy). It stays hidden while one of the game's own tooltips is shown, such as an item's. The extension reads your save data from the running game; the Poké Ball tint, the mint labels and the biome choice colors are the only things it changes.
 

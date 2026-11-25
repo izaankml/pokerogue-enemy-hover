@@ -159,6 +159,8 @@ export interface SpeciesView {
   getRootSpeciesId(forStarter?: boolean): number;
   /** Every earlier stage of the species' line, each with the level it evolves at. */
   getPrevolutionLevels(): readonly (readonly [speciesId: number, level: number])[];
+  /** Every later stage of the species' line, once per way of evolving into it. */
+  getEvolutionLevels(): readonly (readonly [speciesId: number, level: number])[];
   getFullUnlocksData(): bigint;
 }
 
