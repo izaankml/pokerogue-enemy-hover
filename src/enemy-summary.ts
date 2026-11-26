@@ -71,7 +71,7 @@ interface StarterLine {
 }
 
 export function summarizeEnemy(enemy: EnemyPokemonView, context: SummaryContext): EnemySummary {
-  const baseStats = enemy.calculateBaseStats();
+  const baseStats = getSpeciesBaseStats(enemy);
   const starterLine = enemy.hasTrainer() ? null : findCaughtStarterLine(enemy.species.getRootSpeciesId(), context);
   return {
     kind: "enemy",
@@ -86,6 +86,19 @@ export function summarizeEnemy(enemy: EnemyPokemonView, context: SummaryContext)
     baseStatTotal: baseStats.reduce((total, value) => total + value, 0),
     starterProgress: starterLine ? listStarterProgress(starterLine, context.gameData) : [],
   };
+}
+
+/**
+ * The species' own base stats, without items, challenges or game mode rules. A fusion averages
+ * both species, rounding up, as the game does.
+ */
+function getSpeciesBaseStats(enemy: EnemyPokemonView): number[] {
+  const baseStats = [...enemy.getSpeciesForm(true).baseStats];
+  if (!enemy.isFusion()) {
+    return baseStats;
+  }
+  const fusionBaseStats = enemy.getFusionSpeciesForm(true).baseStats;
+  return baseStats.map((value, statIndex) => Math.ceil((value + (fusionBaseStats[statIndex] ?? value)) / 2));
 }
 
 export function hasNatureUnlocked(dexEntry: DexEntryView, nature: number): boolean {

@@ -2,7 +2,7 @@
 
 A browser extension for [pokerogue.net](https://pokerogue.net). Hovering an enemy Pokémon's sprite in battle shows:
 
-- its base stats and base stat total, as the game computes them: a fusion averages both species, an unfused Pokémon in Spliced Endless has them halved, and challenges such as Flip Stat and items such as vitamins apply
+- its species' own base stats and base stat total, without items such as vitamins or Shuckle Juice, challenges such as Flip Stat, or the halving in Spliced Endless; a fusion averages both species
 - its starter's progress: passive, egg moves, cost reduction, natures, shiny variants, and candy against the price of a same-species egg
 
 The game saves IVs and natures for each species of a line separately. Catching a Pokémon saves its nature to its own species and every earlier stage, but its IVs only to the starter; evolving one of your Pokémon saves both to the species it evolves into. Each stat name and the Natures count are colored by how far through the line that progress is complete:

@@ -164,6 +164,12 @@ export interface SpeciesView {
   getFullUnlocksData(): bigint;
 }
 
+/** A species, or one of its forms. */
+export interface SpeciesFormView {
+  /** HP, Attack, Defense, Sp. Atk, Sp. Def and Speed. */
+  baseStats: readonly number[];
+}
+
 export interface EnemyPokemonView {
   id: number;
   name: string;
@@ -175,11 +181,11 @@ export interface EnemyPokemonView {
   ivs: readonly number[];
   /** The enemy's name panel, which carries the owned icon. */
   battleInfo?: { visible: boolean; ownedIcon?: OwnedIconView };
-  /**
-   * The base stats the game computes stats from: a fusion's average of both species, halved in
-   * Spliced Endless when unfused, with challenges and held items applied. Returns a new array.
-   */
-  calculateBaseStats(): number[];
+  /** The current form of the species. With `ignoreOverride`, the form before any Transform. */
+  getSpeciesForm(ignoreOverride?: boolean): SpeciesFormView;
+  /** The current form of the fusion species. Only valid for a fusion. */
+  getFusionSpeciesForm(ignoreOverride?: boolean): SpeciesFormView;
+  isFusion(): boolean;
   getDexAttr(): bigint;
   getSprite(): SpriteView | undefined;
   hasTrainer(): boolean;
